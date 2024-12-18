@@ -1,0 +1,150 @@
+###Here is a comprehensive list of all the tools, libraries, and requirements necessary for conducting the Covid-19 impacts analysis using Python:
+
+---
+
+## **1. Tools and Software**
+
+1. **Programming Language**:  
+   - Python 3.x (recommended version for compatibility with libraries).
+
+2. **Development Environment**:  
+   - **Jupyter Notebook**: Ideal for interactive coding and visualization.
+   - **Google Colab**: Cloud-based alternative for running Python code without local setup.
+   - **Python IDEs**: PyCharm, Visual Studio Code, or any preferred IDE.
+
+3. **Dataset Source**:  
+   - Kaggle (contains the required datasets for Covid-19 analysis).  
+     - **Transformed Data (`transformed_data.csv`)**: Contains processed data with columns like country code, HDI, total cases, total deaths, stringency index, population, and GDP per capita.
+     - **Raw Data (`raw_data.csv`)**: Includes daily Covid-19 cases and deaths along with other attributes.
+
+4. **Hardware Requirements**:  
+   - A system with at least 4GB RAM (8GB or more recommended for smooth execution of large datasets).
+   - Internet connection for downloading datasets and installing libraries.
+
+---
+
+## **2. Python Libraries**
+
+### **Core Libraries**
+1. **`pandas`**: For data manipulation and cleaning.
+2. **`numpy`**: For numerical computations (optional but useful).
+
+### **Visualization Libraries**
+1. **`plotly.express`**: For creating interactive visualizations like bar charts and pie charts.
+2. **`plotly.graph_objects`**: For advanced visualizations such as grouped bar charts.
+
+### **Installation Commands**
+Install the required Python libraries using pip:
+```bash
+pip install pandas plotly
+```
+
+---
+
+## **3. Required Data Columns**
+
+The analysis uses the following columns from the datasets:
+
+1. From `transformed_data.csv`:
+   - `CODE`: Country code.
+   - `COUNTRY`: Name of the country.
+   - `DATE`: Date of the record.
+   - `HDI`: Human Development Index.
+   - `TC`: Total Covid-19 cases.
+   - `TD`: Total Covid-19 deaths.
+   - `STI`: Stringency Index (composite measure of response indicators like school closures, workplace closures, etc.).
+   - `POP`: Population of the country.
+   - `GDPCAP`: GDP per capita.
+
+2. From `raw_data.csv`:
+   - `iso_code`: Country ISO code.
+   - `location`: Country name.
+   - `date`: Date of record.
+   - `total_cases`: Daily total cases.
+   - `total_deaths`: Daily total deaths.
+   - `stringency_index`: Stringency Index value.
+   - Additional columns related to population and GDP per capita.
+
+---
+
+## **4. Steps in Analysis**
+
+### Step 1: Data Preparation
+- Load both datasets (`transformed_data.csv` and `raw_data.csv`) using pandas:
+  ```python
+  import pandas as pd
+  data = pd.read_csv("transformed_data.csv")
+  data2 = pd.read_csv("raw_data.csv")
+  ```
+
+### Step 2: Data Aggregation
+- Combine relevant columns from both datasets into a new dataset:
+  ```python
+  aggregated_data = pd.DataFrame(list(zip(
+      data["CODE"].unique(),
+      data["COUNTRY"].unique(),
+      [data.loc[data["COUNTRY"] == i, "HDI"].sum()/294 for i in data["COUNTRY"].unique()],
+      [data2.loc[data2["location"] == i, "total_cases"].sum() for i in data["COUNTRY"].unique()],
+      [data2.loc[data2["location"] == i, "total_deaths"].sum() for i in data["COUNTRY"].unique()],
+      [data.loc[data["COUNTRY"] == i, "STI"].sum()/294 for i in data["COUNTRY"].unique()],
+      [data2.loc[data2["location"] == i, "population"].sum()/294 for i in data["COUNTRY"].unique()]
+  )), columns=["Country Code", "Country", "HDI", "Total Cases", "Total Deaths", "Stringency Index", "Population"])
+  ```
+
+### Step 3: Select Top Countries
+- Sort countries by total cases and select the top 10:
+  ```python
+  top_countries = aggregated_data.sort_values(by=["Total Cases"], ascending=False).head(10)
+  ```
+
+### Step 4: Add GDP Information
+- Manually add GDP per capita before and during Covid-19:
+  ```python
+  top_countries["GDP Before Covid"] = [65279.53, ...] # Add values manually
+  top_countries["GDP During Covid"] = [63543.58, ...]
+  ```
+
+---
+
+## **5. Visualizations**
+
+Use Plotly to create interactive visualizations:
+
+1. Bar chart for total cases by country:
+   ```python
+   import plotly.express as px
+   figure = px.bar(top_countries, x='Country', y='Total Cases', title="Countries with Highest Covid Cases")
+   figure.show()
+   ```
+
+2. Compare GDP before and during Covid-19:
+   ```python
+   import plotly.graph_objects as go
+   fig = go.Figure()
+   fig.add_trace(go.Bar(x=top_countries["Country"], y=top_countries["GDP Before Covid"], name="Before Covid"))
+   fig.add_trace(go.Bar(x=top_countries["Country"], y=top_countries["GDP During Covid"], name="During Covid"))
+   fig.update_layout(barmode='group')
+   fig.show()
+   ```
+
+3. Stringency Index visualization:
+   ```python
+   figure = px.bar(top_countries, x='Country', y='Stringency Index', title="Stringency Index during Covid-19")
+   figure.show()
+   ```
+
+4. Human Development Index (HDI):
+   ```python
+   figure = px.bar(top_countries, x='Country', y='HDI', title="Human Development Index during Covid-19")
+   figure.show()
+   ```
+
+5. Death rate calculation:
+```python
+death_rate = (top_countries["Total Deaths"].sum() / top_countries["Total Cases"].sum()) * 100
+print("Death Rate =", death_rate)
+```
+
+---
+
+This detailed list ensures we have all the necessary tools and resources to perform a comprehensive analysis of Covid-19's impacts on the global economy using Python.

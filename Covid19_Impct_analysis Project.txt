@@ -1,0 +1,140 @@
+##detailed To-Do for the case of Covid-19 Impacts Analysis
+---
+
+## **Covid-19 Impacts Analysis: Questionnaire**
+
+### **1. Objective**
+- What is the goal of this analysis?  
+  *To study the spread of Covid-19 and its economic impacts across various countries using Python.*
+
+---
+
+### **2. Dataset**
+- What data is required for this analysis?  
+  *The analysis uses two datasets:*
+  - *Transformed data (`transformed_data.csv`): Contains processed Covid-19 data with columns like country code, human development index (HDI), total cases, total deaths, stringency index, population, and GDP per capita.*
+  - *Raw data (`raw_data.csv`): Contains unprocessed data with additional details such as total cases and deaths per day.*
+
+- Where can the dataset be obtained?  
+  *The dataset can be downloaded from Kaggle.*
+
+---
+
+### **3. Tools and Software Required**
+- Which programming language will be used?  
+  *Python*
+
+- What libraries are necessary for this analysis?  
+  - `pandas`: For data manipulation and cleaning.
+  - `plotly.express` and `plotly.graph_objects`: For creating visualizations.
+
+- What software setup is needed?  
+  - Install Python (version 3.x recommended).
+  - Install necessary libraries using pip:
+    ```bash
+    pip install pandas plotly
+    ```
+
+---
+
+### **4. Steps in the Analysis**
+#### **Step 1: Data Preparation**
+- How do you load the datasets?  
+  ```python
+  import pandas as pd
+  data = pd.read_csv("transformed_data.csv")
+  data2 = pd.read_csv("raw_data.csv")
+  ```
+
+- How do you inspect the datasets?  
+  ```python
+  print(data.head())
+  print(data2.head())
+  ```
+
+#### **Step 2: Data Aggregation**
+- How do you combine and preprocess the datasets?  
+  - Aggregate columns like HDI, total cases, total deaths, stringency index, and population.
+  - Use `value_counts()` to analyze sample distributions across countries.
+  ```python
+  aggregated_data = pd.DataFrame(list(zip(code, country, hdi, tc, td, sti, population)), 
+                                 columns=["Country Code", "Country", "HDI", "Total Cases", 
+                                          "Total Deaths", "Stringency Index", "Population"])
+  ```
+
+#### **Step 3: Selecting Top Countries**
+- How do you select countries with the highest Covid-19 cases?  
+  ```python
+  top_countries = aggregated_data.sort_values(by=["Total Cases"], ascending=False).head(10)
+  ```
+
+#### **Step 4: Adding GDP Data**
+- How do you include GDP before and during Covid-19?
+  ```python
+  top_countries["GDP Before Covid"] = [65279.53, ...] # Add manual values
+  top_countries["GDP During Covid"] = [63543.58, ...] # Add manual values
+  ```
+
+#### **Step 5: Visualizations**
+1. **Spread of Covid-19**:
+   - Bar chart for total cases by country:
+     ```python
+     import plotly.express as px
+     figure = px.bar(top_countries, y='Total Cases', x='Country', title="Countries with Highest Covid Cases")
+     figure.show()
+     ```
+   - Bar chart for total deaths:
+     ```python
+     figure = px.bar(top_countries, y='Total Deaths', x='Country', title="Countries with Highest Deaths")
+     figure.show()
+     ```
+
+2. **Economic Impacts**:
+   - Compare GDP before and during Covid-19:
+     ```python
+     import plotly.graph_objects as go
+     fig = go.Figure()
+     fig.add_trace(go.Bar(x=top_countries["Country"], y=top_countries["GDP Before Covid"], name='Before Covid'))
+     fig.add_trace(go.Bar(x=top_countries["Country"], y=top_countries["GDP During Covid"], name='During Covid'))
+     fig.update_layout(barmode='group')
+     fig.show()
+     ```
+
+3. **Stringency Index**:
+   - Visualize how strictly countries followed measures:
+     ```python
+     figure = px.bar(top_countries, x='Country', y='Stringency Index', title="Stringency Index during Covid-19")
+     figure.show()
+     ```
+
+4. **Human Development Index (HDI)**:
+   - Analyze HDI during Covid-19:
+     ```python
+     figure = px.bar(top_countries, x='Country', y='HDI', title="Human Development Index during Covid-19")
+     figure.show()
+     ```
+
+5. **Death Rate Calculation**:
+   - Calculate death rate across all countries:
+     ```python
+     death_rate = (top_countries["Total Deaths"].sum() / top_countries["Total Cases"].sum()) * 100
+     print("Death Rate =", death_rate)
+     ```
+
+---
+
+### **5. Outputs**
+- What are the expected outputs?
+  - Visual insights into the spread of Covid-19 (total cases and deaths).
+  - Economic impact through GDP comparisons.
+  - Stringency index performance by country.
+  - Human development index trends.
+
+---
+
+### **6. Conclusion**
+- What conclusions can be drawn from this analysis?
+  *The analysis highlights how different countries were impacted by Covid-19 in terms of health outcomes (cases and deaths) and economic factors (GDP per capita). It also provides insights into government responses via stringency indices.*
+
+---
+
